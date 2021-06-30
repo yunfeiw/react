@@ -1,23 +1,31 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import 'amfe-flexible';
-import './asset/css/index.css';
-import App from './App';
-import store from './store/index';
-import reportWebVitals from './reportWebVitals';
+import React from './mini-react/react';
+import ReactDOM from './mini-react/react-dom';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </React.StrictMode>
-  ,
-  document.getElementById('root')
-);
+class Foo extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      name: 'wang'
+    }
+  }
+  componentDidMount() {
+    console.log('挂载完成')
+    this.setState({name:'yunfei'})
+  }
+  render() {
+    const { name } = this.state;
+    return (<div>
+      Foo：{name}
+    </div>)
+  }
+}
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+const App = (
+  <div>
+    hello world
+    <Foo />
+    <div style={{ width: '200px', height: '200px', border: '2px solid #000' }}></div>
+    <button onClick={() => { alert(1) }}>点击</button>
+  </div>
+)
+ReactDOM.render(App, document.querySelector('#root'))
