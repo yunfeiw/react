@@ -13,9 +13,10 @@ class Foo extends React.Component {
     this.setState({name:'yunfei'})
   }
   render() {
-    const { name } = this.state;
-    return (<div>
-      Foo：{name}
+    // const { name } = this.state;
+    return (<div className={this.state.name}>
+      Foo：{this.state.name}
+      <button onClick={()=>{this.setState({name : this.state.name + Date.now()})}}>add</button>
     </div>)
   }
 }

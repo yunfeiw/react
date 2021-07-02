@@ -53,6 +53,8 @@ function createCmp(vCmp) {
     const vnode = Cmp.render();
     // 生成 节点
     let node = createNode(vnode);
+    
+    vCmp.Cmp = Cmp; //记录
 
     /** 声明 更新组件函数 */
     Cmp.updater = (nextProps, nextState) => {
@@ -90,9 +92,12 @@ function batchUpdate(Cmp, fn, args, $this) {
     Cmp.nextStates.forEach(state => {
         Object.assign(nextState, state); //合并任务队列中的状态
     })
+    // 有变化时更新
+    if(nextState.length>0){
 
-    // 更新组件 
-    Cmp.updater(Cmp.props, nextState);  // 此方法在 创建组件node时 声明
+        // 更新组件 
+        Cmp.updater(Cmp.props, nextState);  // 此方法在 创建组件node时 声明
+    }
 
 }
 // class 组件 props 映射 到 state
@@ -118,8 +123,10 @@ function createProps(node, props) {
             }
         } else if (EVENTS.includes(p)) {
             // 绑定事件
-            node[p.toLocaleLowerCase()] = props[p].bind(undefined);//改变指针
-        }
+            node[p.toLocaleLowerCase()] = props[p];//改变指针
+        } else {
+            node[p] = props[p];
+         }
     }
 
     // 事件

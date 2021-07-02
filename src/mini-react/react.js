@@ -13,6 +13,8 @@ function createElement(type, props, ...child) {
     delete props.__self;
     delete props.__source;
 
+    let key = props.key;
+    delete props.key;
     let children = child.flat(Infinity);
 
     // 处理 string 与 number（react中是在 react-dom处理的）
@@ -27,7 +29,13 @@ function createElement(type, props, ...child) {
             return null
         }
     }).filter(e => e)
-    return { $$type: reactElement, type, props, children }
+    return {
+        $$type: reactElement,
+        key: key !== undefined ? "RC" + key : undefined,
+        type,
+        props,
+        children
+    }
 }
 
 
