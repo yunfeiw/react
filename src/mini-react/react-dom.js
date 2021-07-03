@@ -33,52 +33,42 @@ function createNode(vnode) {
             }
         }
     } else if (vnode.$$type === reactText) {
-        node = document.createTextNode(vnode.inner)
+        node = document.createTextNode(vnode.inner);
     }
-    return node
+    vnode.dom = node;
+    return node;
 }
 
 // 创建组件
 function createCmp(vCmp) {
-    // 实例化 class
-
-    let Cmp = new vCmp.type(vCmp.props); //传参 props
+    let Cmp = new vCmp.type(vCmp.props);
     // 生命周期
     let nextState = stateFromProps(vCmp, vCmp.props, Cmp.state);
-    // 合并状态
     if (nextState) {
-        Object.assign(Cmp.state, nextState);
+        Object.assign(Cmp.state || {}, nextState);
     }
-    // 获取 vdom
-    const vnode = Cmp.render();
-    // 生成 节点
+    let vnode = Cmp.render();
     let node = createNode(vnode);
-    
-    vCmp.Cmp = Cmp; //记录
-
-    /** 声明 更新组件函数 */
+    //更新组件
+    vCmp.Cmp = Cmp;
     Cmp.updater = (nextProps, nextState) => {
-        // shouldComponentUpdate
+        //Object.assign(nextState,stateFromProps(vCmp,nextProps,nextState));
+        // SCU
         let prevProps = Cmp.props;
         let prevState = Cmp.state;
         Cmp.props = nextProps;
         Cmp.state = nextState;
 
-        // 生成 新的 vdom
-        let newNode = Cmp.render();
-        // diff 操作
-        diff(vnode, newNode);
-
-    }
-
-    // 组件 mounted (react解决方案 微任务 事件队列)使用 setTimeout 替换
+        //调用 render 生成新的 虚拟DOM；
+        let newVNode = Cmp.render();
+        // getSnapshotBeforeUpdate 
+        vnode = diff(vnode, newVNode, createNode);
+        return vCmp;
+    };
     setTimeout(() => {
-        // didMount(Cmp)
-        batchUpdate(Cmp, didMount, [Cmp])
+        batchUpdate(Cmp, didMount, [Cmp]);
     })
-
     return node;
-
 }
 // 批处理
 function batchUpdate(Cmp, fn, args, $this) {
@@ -93,7 +83,7 @@ function batchUpdate(Cmp, fn, args, $this) {
         Object.assign(nextState, state); //合并任务队列中的状态
     })
     // 有变化时更新
-    if(nextState.length>0){
+    if (nextState.length > 0) {
 
         // 更新组件 
         Cmp.updater(Cmp.props, nextState);  // 此方法在 创建组件node时 声明
@@ -105,6 +95,7 @@ function stateFromProps(cmp, props, state) {
     // 判断当前是否存在此方法
     return cmp.type.getDerivedStateFromProps ? cmp.type.getDerivedStateFromProps(props, state) : {}
 }
+
 
 // class 组件 ComponentDidMount
 function didMount(cmp) {
@@ -126,7 +117,7 @@ function createProps(node, props) {
             node[p.toLocaleLowerCase()] = props[p];//改变指针
         } else {
             node[p] = props[p];
-         }
+        }
     }
 
     // 事件
